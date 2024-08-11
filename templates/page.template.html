@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>{{PAGE_TITLE}}</title>
+
+  {{PAGE_HEAD}}
+</head>
+<body>
+
+<div class="XDocsPage">
+  <div class="XDocsPageNavigation">{{PAGE_NAVIGATION}}</div>
+  <div class="XDocsPageContent">
+    {{PAGE_CONTENT}}
+    <div class="XDocsPageContentBcFw">
+      {{PAGE_PREV_BUTTON}}
+      {{PAGE_NEXT_BUTTON}}
+    </div>
+  </div>
+</div>
+
+{{PAGE_SCRIPTS}}
+
+<script>
+  if (window.location.protocol !== "file:") {
+    document.addEventListener("turbolinks:load", () => {
+      Turbolinks.start();
+    });
+    const turbolinksScript = document.createElement("script");
+    turbolinksScript.src = `./assets/core/turbolinks.min.js?time=${new Date().getTime()}`;
+    document.head.appendChild(turbolinksScript);
+  }
+</script>
+</body>
+</html>
