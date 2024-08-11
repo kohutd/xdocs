@@ -25,9 +25,9 @@ if (!themeFolder) {
 }
 
 function generate() {
-  console.log("Generating...");
+  console.log("Генерація...");
   child_process.execSync(`node ${__dirname}/generate.mjs ${inputFolder} ${outputFolder} ${themeFolder}`, { stdio: "inherit" });
-  console.log("Done");
+  console.log("Готово");
 }
 
 generate();
