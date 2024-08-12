@@ -53,8 +53,9 @@ const navigationItemLinkTemplateText = fs.readFileSync(`${__dirname}/templates/n
 const navigationItemSubmenuTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu.template.html`, "utf8");
 const navigationItemSubmenuLinkTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu_link.template.html`, "utf8");
 
-function renderPageTemplate({ title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
+function renderPageTemplate({ icon, title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
   return pageTemplateText
+    .replaceAll("{{PAGE_ICON}}", icon ? `<div class="XDocsPageIcon"><img src="${icon}" alt=""></div>` : "")
     .replaceAll("{{PAGE_TITLE}}", title)
     .replaceAll("{{PAGE_HEAD}}", head)
     .replaceAll("{{PAGE_NAVIGATION}}", navigation)
@@ -95,23 +96,23 @@ function renderNavigationItemSubmenuLinkTemplate({ name, url, active } = {}) {
 }
 
 fs.mkdirSync(outputFolder, { recursive: true });
-fs.mkdirSync(`${outputFolder}/assets`, { recursive: true });
+fs.mkdirSync(`${outputFolder}/ресурси`, { recursive: true });
 
-fs.cpSync(`${__dirname}/static`, `${outputFolder}/assets/core`, { recursive: true });
-fs.cpSync(`${themeFolder}/static`, `${outputFolder}/assets/theme`, { recursive: true });
-if (fs.existsSync(`${themeFolder}/static/theme.scss`)) {
-  child_process.execSync(`sass ${themeFolder}/static/theme.scss ${outputFolder}/assets/theme/theme.css`, { stdio: "inherit" });
-  fs.rmSync(`${outputFolder}/assets/theme/theme.scss`, { force: true });
+fs.cpSync(`${__dirname}/ядро`, `${outputFolder}/ресурси/ядро`, { recursive: true });
+fs.cpSync(`${themeFolder}/ресурси`, `${outputFolder}/ресурси/тема`, { recursive: true });
+if (fs.existsSync(`${themeFolder}/ресурси/тема.scss`)) {
+  child_process.execSync(`sass ${themeFolder}/ресурси/тема.scss ${outputFolder}/ресурси/тема/тема.css`, { stdio: "inherit" });
+  fs.rmSync(`${outputFolder}/ресурси/тема/тема.scss`, { force: true });
 }
 
 const pageHeadStyles = [
-  "assets/core/highlight-atom-one-dark.css",
-  "assets/theme/theme.css"
+  "ресурси/ядро/highlight-atom-one-dark.css",
+  "ресурси/тема/тема.css"
 ];
 const pageHeadScripts = [];
 const pageBodyScripts = [
-  "assets/core/core.js",
-  "assets/theme/theme.js"
+  "ресурси/ядро/ядро.js",
+  "ресурси/тема/тема.js"
 ];
 
 function countSlashes(str) {
@@ -123,6 +124,7 @@ function repeatString(str, count) {
 }
 
 function renderPage(page, prevPage, nextPage) {
+  const pageIcon = page["іконка"];
   const pageName = page["назва"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
@@ -140,7 +142,7 @@ function renderPage(page, prevPage, nextPage) {
 
   const renderedNavigation = renderNavigationTemplate({
     logoUrl: documentationFile["головна"],
-    logoImage: documentationFile["логотип"],
+    logoImage: urlPrefix + documentationFile["логотип"],
     links: documentationFile["сторінки"].map((documentationPage) => {
       if (documentationPage["сторінки"]) {
         const submenuLinks = documentationPage["сторінки"].map((documentationSubpage) => {
@@ -163,11 +165,12 @@ function renderPage(page, prevPage, nextPage) {
         });
       }
     }).join("\n"),
-    footerImage: documentationFile["іконка_підпису"],
+    footerImage: urlPrefix + documentationFile["іконка_підпису"],
     footerText: documentationFile["підпис"]
   });
 
   const renderedPage = renderPageTemplate({
+    icon: pageIcon ? urlPrefix + pageIcon : undefined,
     title: `${pageName} | ${documentationFile["назва"]}`,
     head: headStyles + headScripts,
     navigation: renderedNavigation,
@@ -180,8 +183,8 @@ function renderPage(page, prevPage, nextPage) {
   fs.writeFileSync(pageOut, renderedPage);
 }
 
-if (fs.existsSync(`${themeFolder}/extend.js`)) {
-  eval(fs.readFileSync(`${themeFolder}/extend.js`, "utf8"));
+if (fs.existsSync(`${themeFolder}/розширити.js`)) {
+  eval(fs.readFileSync(`${themeFolder}/розширити.js`, "utf8"));
 }
 
 documentationFile["сторінки"].flatMap((page) => {
