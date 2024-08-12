@@ -105,26 +105,38 @@ if (fs.existsSync(`${themeFolder}/static/theme.scss`)) {
 }
 
 const pageHeadStyles = [
-  "./assets/core/highlight-atom-one-dark.css",
-  "./assets/theme/theme.css"
+  "assets/core/highlight-atom-one-dark.css",
+  "assets/theme/theme.css"
 ];
 const pageHeadScripts = [];
 const pageBodyScripts = [
-  "./assets/core/core.js",
-  "./assets/theme/theme.js"
+  "assets/core/core.js",
+  "assets/theme/theme.js"
 ];
+
+function countSlashes(str) {
+  return str.split("/").length - 1;
+}
+
+function repeatString(str, count) {
+  return new Array(count).fill(str).join("");
+}
 
 function renderPage(page, prevPage, nextPage) {
   const pageName = page["назва"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
 
+  fs.mkdirSync(path.dirname(pageOut), { recursive: true });
+
   const pageMarkdownContent = fs.readFileSync(pageFile, "utf8");
   const pageHtmlContent = md.render(pageMarkdownContent);
 
-  const headStyles = pageHeadStyles.map((style) => `<link rel="stylesheet" href="${style}?${new Date().getTime()}">`).join("\n");
-  const headScripts = pageHeadScripts.map((script) => `<script src="${script}?${new Date().getTime()}"></script>`).join("\n");
-  const bodyScripts = pageBodyScripts.map((script) => `<script src="${script}?${new Date().getTime()}"></script>`).join("\n");
+  const urlPrefix = `${repeatString(".", countSlashes(page["вихід"]) + 1)}/`;
+
+  const headStyles = pageHeadStyles.map((style) => `<link rel="stylesheet" href="${urlPrefix}${style}?${new Date().getTime()}">`).join("\n");
+  const headScripts = pageHeadScripts.map((script) => `<script src="${urlPrefix}${script}?${new Date().getTime()}"></script>`).join("\n");
+  const bodyScripts = pageBodyScripts.map((script) => `<script src="${urlPrefix}${script}?${new Date().getTime()}"></script>`).join("\n");
 
   const renderedNavigation = renderNavigationTemplate({
     logoUrl: documentationFile["головна"],
@@ -134,7 +146,7 @@ function renderPage(page, prevPage, nextPage) {
         const submenuLinks = documentationPage["сторінки"].map((documentationSubpage) => {
           return renderNavigationItemSubmenuLinkTemplate({
             name: documentationSubpage["назва"],
-            url: `./${documentationSubpage["вихід"]}`,
+            url: `${urlPrefix}${documentationSubpage["вихід"]}`,
             active: documentationSubpage["назва"] === pageName
           });
         }).join("\n");
@@ -146,7 +158,7 @@ function renderPage(page, prevPage, nextPage) {
       } else {
         return renderNavigationItemLinkTemplate({
           name: documentationPage["назва"],
-          url: `./${documentationPage["вихід"]}`,
+          url: `${urlPrefix}${documentationPage["вихід"]}`,
           active: documentationPage["назва"] === pageName
         });
       }
@@ -161,8 +173,8 @@ function renderPage(page, prevPage, nextPage) {
     navigation: renderedNavigation,
     content: pageHtmlContent,
     scripts: bodyScripts,
-    prevUrl: prevPage ? `./${prevPage["вихід"]}` : "",
-    nextUrl: nextPage ? `./${nextPage["вихід"]}` : ""
+    prevUrl: prevPage ? `${urlPrefix}${prevPage["вихід"]}` : "",
+    nextUrl: nextPage ? `${urlPrefix}${nextPage["вихід"]}` : ""
   });
 
   fs.writeFileSync(pageOut, renderedPage);
