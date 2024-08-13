@@ -53,10 +53,10 @@ const navigationItemLinkTemplateText = fs.readFileSync(`${__dirname}/templates/n
 const navigationItemSubmenuTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu.template.html`, "utf8");
 const navigationItemSubmenuLinkTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu_link.template.html`, "utf8");
 
-function renderPageTemplate({ icon, title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
+function renderPageTemplate({ icon, favicon, title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
   return pageTemplateText
     .replaceAll("{{PAGE_ICON}}", icon ? `<div class="XDocsPageIcon"><img src="${icon}" alt=""></div>` : "")
-    .replaceAll("{{PAGE_FAVICON}}", icon)
+    .replaceAll("{{PAGE_FAVICON}}", favicon)
     .replaceAll("{{PAGE_TITLE}}", title)
     .replaceAll("{{PAGE_HEAD}}", head)
     .replaceAll("{{PAGE_NAVIGATION}}", navigation)
@@ -172,6 +172,7 @@ function renderPage(page, prevPage, nextPage) {
 
   const renderedPage = renderPageTemplate({
     icon: pageIcon ? urlPrefix + pageIcon : undefined,
+    favicon: urlPrefix + documentationFile["логотип"],
     title: `${pageName} | ${documentationFile["назва"]}`,
     head: headStyles + headScripts,
     navigation: renderedNavigation,
