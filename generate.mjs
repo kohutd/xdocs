@@ -136,9 +136,9 @@ function renderPage(page, prevPage, nextPage) {
 
   const urlPrefix = `${repeatString(".", countSlashes(page["вихід"]) + 1)}/`;
 
-  const headStyles = pageHeadStyles.map((style) => `<link rel="stylesheet" href="${urlPrefix}${style}?${new Date().getTime()}">`).join("\n");
-  const headScripts = pageHeadScripts.map((script) => `<script src="${urlPrefix}${script}?${new Date().getTime()}"></script>`).join("\n");
-  const bodyScripts = pageBodyScripts.map((script) => `<script src="${urlPrefix}${script}?${new Date().getTime()}"></script>`).join("\n");
+  const headStyles = pageHeadStyles.map((style) => `<link rel="stylesheet" href="${urlPrefix}">`).join("\n");
+  const headScripts = pageHeadScripts.map((script) => `<script src="${urlPrefix}${script}"></script>`).join("\n");
+  const bodyScripts = pageBodyScripts.map((script) => `<script src="${urlPrefix}${script}"></script>`).join("\n");
 
   const renderedNavigation = renderNavigationTemplate({
     logoUrl: documentationFile["головна"],
