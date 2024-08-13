@@ -56,6 +56,7 @@ const navigationItemSubmenuLinkTemplateText = fs.readFileSync(`${__dirname}/temp
 function renderPageTemplate({ icon, title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
   return pageTemplateText
     .replaceAll("{{PAGE_ICON}}", icon ? `<div class="XDocsPageIcon"><img src="${icon}" alt=""></div>` : "")
+    .replaceAll("{{PAGE_FAVICON}}", icon)
     .replaceAll("{{PAGE_TITLE}}", title)
     .replaceAll("{{PAGE_HEAD}}", head)
     .replaceAll("{{PAGE_NAVIGATION}}", navigation)
