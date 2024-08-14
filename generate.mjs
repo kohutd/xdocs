@@ -53,9 +53,23 @@ const navigationItemLinkTemplateText = fs.readFileSync(`${__dirname}/templates/n
 const navigationItemSubmenuTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu.template.html`, "utf8");
 const navigationItemSubmenuLinkTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu_link.template.html`, "utf8");
 
-function renderPageTemplate({ icon, favicon, title, head, navigation, content, scripts, prevUrl, nextUrl } = {}) {
+function renderPageTemplate(
+  {
+    icon,
+    iconSize,
+    favicon,
+    title,
+    head,
+    navigation,
+    content,
+    scripts,
+    prevUrl,
+    nextUrl
+  } = {}
+) {
   return pageTemplateText
-    .replaceAll("{{PAGE_ICON}}", icon ? `<div class="XDocsPageIcon"><img src="${icon}" alt=""></div>` : "")
+    .replaceAll("{{PAGE_ICON}}", icon ? `<div class="XDocsPageIcon"><img height="${iconSize}px" src="${icon}" alt=""></div>` : "")
+    .replaceAll("{{PAGE_ICON_SIZE}}", `${iconSize}px`)
     .replaceAll("{{PAGE_FAVICON}}", favicon)
     .replaceAll("{{PAGE_TITLE}}", title)
     .replaceAll("{{PAGE_HEAD}}", head)
@@ -172,6 +186,7 @@ function renderPage(page, prevPage, nextPage) {
 
   const renderedPage = renderPageTemplate({
     icon: pageIcon ? urlPrefix + pageIcon : undefined,
+    iconSize: page["висота_іконки"] ? page["висота_іконки"] : 50,
     favicon: urlPrefix + documentationFile["логотип"],
     title: `${pageName} | ${documentationFile["назва"]}`,
     head: headStyles + headScripts,
