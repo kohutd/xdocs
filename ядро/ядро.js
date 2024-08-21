@@ -39,3 +39,43 @@ document
   .forEach(($toggle) => {
     $toggle.addEventListener("click", toggleMobileNavigation);
   });
+
+let lastIframeId = 0;
+const pendingSearches = new Map();
+
+const $iframe = document.querySelector(".XDocsPageNavigationSearch iframe");
+
+function search(query) {
+  return new Promise((res, rej) => {
+    $iframe.contentWindow.postMessage(
+      { id: ++lastIframeId, type: "search", query },
+      "*",
+    );
+    pendingSearches.set(lastIframeId, { res, rej });
+  });
+}
+
+window.searchDocs = search;
+
+window.addEventListener("message", (event) => {
+  const eventData = event.data;
+  const eventId = eventData.id;
+  if (pendingSearches.has(eventId)) {
+    const { res, rej } = pendingSearches.get(eventId);
+    if (eventData.result) {
+      res(eventData.result);
+    } else {
+      rej(eventData.error);
+    }
+    pendingSearches.delete(eventId);
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "/") {
+    if (document.activeElement.tagName !== "INPUT") {
+      e.preventDefault();
+      document.querySelector(".XDocsPageNavigationSearch button").click();
+    }
+  }
+});

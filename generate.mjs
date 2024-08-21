@@ -52,6 +52,7 @@ const navigationTemplateText = fs.readFileSync(`${__dirname}/templates/navigatio
 const navigationItemLinkTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_link.template.html`, "utf8");
 const navigationItemSubmenuTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu.template.html`, "utf8");
 const navigationItemSubmenuLinkTemplateText = fs.readFileSync(`${__dirname}/templates/navigation_item_submenu_link.template.html`, "utf8");
+const searchTemplateText = fs.readFileSync(`${__dirname}/templates/search.template.html`, "utf8");
 
 function renderPageTemplate(
   {
@@ -64,7 +65,9 @@ function renderPageTemplate(
     content,
     scripts,
     prevUrl,
-    nextUrl
+    nextUrl,
+    urlPrefix,
+    searchIframeUrl
   } = {}
 ) {
   return pageTemplateText
@@ -77,7 +80,9 @@ function renderPageTemplate(
     .replaceAll("{{PAGE_CONTENT}}", content)
     .replaceAll("{{PAGE_SCRIPTS}}", scripts)
     .replaceAll("{{PAGE_PREV_BUTTON}}", prevUrl ? `<a data-is-prev="true" href="${prevUrl}">Відступ</>` : "")
-    .replaceAll("{{PAGE_NEXT_BUTTON}}", nextUrl ? `<a data-is-next="true" href="${nextUrl}">Наступ</>` : "");
+    .replaceAll("{{PAGE_NEXT_BUTTON}}", nextUrl ? `<a data-is-next="true" href="${nextUrl}">Наступ</>` : "")
+    .replaceAll("{{PAGE_SEARCH_IFRAME_URL}}", searchIframeUrl)
+    .replaceAll("{{PAGE_URL_PREFIX}}", urlPrefix);
 }
 
 function renderNavigationTemplate({ logoUrl, logoImage, links, footerImage, footerText } = {}) {
@@ -138,16 +143,37 @@ function repeatString(str, count) {
   return new Array(count).fill(str).join("");
 }
 
+let searchData = [];
+
+let currentPageData = undefined;
+
 function renderPage(page, prevPage, nextPage) {
   const pageIcon = page["іконка"];
   const pageName = page["назва"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
 
+  currentPageData = {};
+  currentPageData.page = page;
+  currentPageData.prevPage = prevPage;
+  currentPageData.nextPage = nextPage;
+  currentPageData.pageName = pageName;
+  currentPageData.pageFile = pageFile;
+  currentPageData.pageOut = pageOut;
+
   fs.mkdirSync(path.dirname(pageOut), { recursive: true });
 
   const pageMarkdownContent = fs.readFileSync(pageFile, "utf8");
   const pageHtmlContent = md.render(pageMarkdownContent);
+
+  searchData.push({
+    title: pageName,
+    content: pageMarkdownContent,
+    path: page["вихід"]
+  });
+
+  currentPageData.pageMarkdownContent = pageMarkdownContent;
+  currentPageData.pageHtmlContent = pageHtmlContent;
 
   const urlPrefix = `${repeatString(".", countSlashes(page["вихід"]) + 1)}/`;
 
@@ -194,7 +220,9 @@ function renderPage(page, prevPage, nextPage) {
     content: pageHtmlContent,
     scripts: bodyScripts,
     prevUrl: prevPage ? `${urlPrefix}${prevPage["вихід"]}` : "",
-    nextUrl: nextPage ? `${urlPrefix}${nextPage["вихід"]}` : ""
+    nextUrl: nextPage ? `${urlPrefix}${nextPage["вихід"]}` : "",
+    urlPrefix: urlPrefix,
+    searchIframeUrl: urlPrefix + "ресурси/search.html"
   });
 
   fs.writeFileSync(pageOut, renderedPage);
@@ -213,3 +241,11 @@ documentationFile["сторінки"].flatMap((page) => {
 }).forEach((page, index, array) => {
   renderPage(page, array[index - 1], array[index + 1]);
 });
+
+function renderSearch() {
+  const searchTemplate = searchTemplateText
+    .replaceAll("{{PAGE_SEARCH_DATA}}", JSON.stringify(searchData).replaceAll("\\", "\\\\").replaceAll("\"", "\\\""));
+  fs.writeFileSync(`${outputFolder}/ресурси/search.html`, searchTemplate);
+}
+
+renderSearch();

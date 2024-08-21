@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="xdocs-url-prefix" content="{{PAGE_URL_PREFIX}}">
+</head>
+<body>
+
+<script>
+  const searchData = JSON.parse("{{PAGE_SEARCH_DATA}}");
+
+  window.addEventListener("message", (event) => {
+    const eventData = event.data;
+    const eventId = eventData.id;
+    const eventType = eventData.type;
+    if (eventType === "search") {
+      const query = eventData.query;
+      const results = searchData.filter((item) => {
+        return item.title.toLowerCase().includes(query.toLowerCase());
+      });
+      window.parent.postMessage(
+        {
+          id: eventId,
+          result: results
+        },
+        "*"
+      );
+    }
+  });
+</script>
+</body>
+</html>
