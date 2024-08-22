@@ -85,12 +85,13 @@ function renderPageTemplate(
     .replaceAll("{{PAGE_URL_PREFIX}}", urlPrefix);
 }
 
-function renderNavigationTemplate({ logoUrl, logoImage, links, footerImage, footerText } = {}) {
+function renderNavigationTemplate({ logoUrl, logoImage, links, footerImage, footerImageUrl, footerText } = {}) {
   return navigationTemplateText
     .replaceAll("{{PAGE_NAVIGATION_LOGO_URL}}", logoUrl)
     .replaceAll("{{PAGE_NAVIGATION_LOGO_IMAGE}}", logoImage)
     .replaceAll("{{PAGE_NAVIGATION_LINKS}}", links)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE}}", footerImage)
+    .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE_URL}}", footerImageUrl)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_TEXT}}", footerText);
 }
 
@@ -207,6 +208,7 @@ function renderPage(page, prevPage, nextPage) {
       }
     }).join("\n"),
     footerImage: urlPrefix + documentationFile["іконка_підпису"],
+    footerImageUrl: documentationFile["посилання_іконки_підпису"],
     footerText: documentationFile["підпис"]
   });
 
