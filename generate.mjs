@@ -151,6 +151,7 @@ let currentPageData = undefined;
 function renderPage(page, prevPage, nextPage) {
   const pageIcon = page["іконка"];
   const pageName = page["назва"];
+  const pageNameInTitle = page["назва_в_заголовку"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
 
@@ -216,7 +217,7 @@ function renderPage(page, prevPage, nextPage) {
     icon: pageIcon ? urlPrefix + pageIcon : undefined,
     iconSize: page["висота_іконки"] ? page["висота_іконки"] : 50,
     favicon: urlPrefix + documentationFile["логотип"],
-    title: pageName.length ? `${pageName} | ${documentationFile["назва"]}` : documentationFile["назва"],
+    title: pageNameInTitle != null ? (pageNameInTitle.length ? `${pageNameInTitle} | ${documentationFile["назва"]}` : documentationFile["назва"]) : `${pageName} | ${documentationFile["назва"]}`,
     head: headStyles + headScripts,
     navigation: renderedNavigation,
     content: pageHtmlContent,
