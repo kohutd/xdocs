@@ -216,7 +216,7 @@ function renderPage(page, prevPage, nextPage) {
     icon: pageIcon ? urlPrefix + pageIcon : undefined,
     iconSize: page["висота_іконки"] ? page["висота_іконки"] : 50,
     favicon: urlPrefix + documentationFile["логотип"],
-    title: `${pageName} | ${documentationFile["назва"]}`,
+    title: pageName.length ? `${pageName} | ${documentationFile["назва"]}` : documentationFile["назва"],
     head: headStyles + headScripts,
     navigation: renderedNavigation,
     content: pageHtmlContent,
