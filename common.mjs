@@ -3,6 +3,7 @@ export function parseArgv() {
   let outputFolder;
   let themeFolder;
   let gtag;
+  let domain;
 
   const argv = process.argv.slice(2);
 
@@ -15,8 +16,10 @@ export function parseArgv() {
       themeFolder = argv[i].split("=")[1];
     } else if (argv[i].startsWith("--ґтег")) {
       gtag = argv[i].split("=")[1];
+    } else if (argv[i].startsWith("--домен")) {
+      domain = argv[i].split("=")[1];
     }
   }
 
-  return { inputFolder, outputFolder, themeFolder, gtag };
+  return { inputFolder, outputFolder, themeFolder, gtag, domain };
 }
