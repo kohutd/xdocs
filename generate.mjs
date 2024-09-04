@@ -5,27 +5,26 @@ import path from "path";
 import hljs from "./libraries/highlight.js";
 import markdownIt from "./libraries/markdown-it.js";
 import child_process from "node:child_process";
+import { parseArgv } from "./common.mjs";
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
-let inputFolder = process.argv[2];
-let outputFolder = process.argv[3];
-let themeFolder = process.argv[4];
+const { inputFolder, outputFolder, themeFolder, gtag } = parseArgv();
 
 if (!inputFolder) {
-  console.error("Необхідно вказати шлях до документації першим параметром");
-  process.exit(1);
+  console.error("Необхідно вказати шлях до документації параметром --вхід=");
+  process.exit(0);
 }
 
 if (!outputFolder) {
-  console.error("Необхідно вказати шлях до вихідної папки другим параметром");
-  process.exit(1);
+  console.error("Необхідно вказати шлях до вихідної папки параметром --вихід=");
+  process.exit(0);
 }
 
 if (!themeFolder) {
-  console.error("Необхідно вказати шлях до теми третім параметром");
-  process.exit(1);
+  console.error("Необхідно вказати шлях до теми параметром --вигляд=");
+  process.exit(0);
 }
 
 const md = markdownIt({
@@ -46,7 +45,7 @@ const md = markdownIt({
 });
 
 const documentationFileText = fs.readFileSync(
-  `${inputFolder}/документація.json`,
+  `${inputFolder}/докс.json`,
   "utf8",
 );
 const documentationFile = JSON.parse(documentationFileText);
@@ -106,14 +105,28 @@ function renderPageTemplate({
     .replaceAll("{{PAGE_SCRIPTS}}", scripts)
     .replaceAll(
       "{{PAGE_PREV_BUTTON}}",
-      prevUrl ? `<a data-is-prev="true" href="${prevUrl}">Відступ</>` : "",
+      prevUrl ? `<a data-is-prev="true" href="${prevUrl}">Відступ</a>` : "",
     )
     .replaceAll(
       "{{PAGE_NEXT_BUTTON}}",
-      nextUrl ? `<a data-is-next="true" href="${nextUrl}">Наступ</>` : "",
+      nextUrl ? `<a data-is-next="true" href="${nextUrl}">Наступ</a >` : "",
     )
     .replaceAll("{{PAGE_SEARCH_IFRAME_URL}}", searchIframeUrl)
-    .replaceAll("{{PAGE_URL_PREFIX}}", urlPrefix);
+    .replaceAll("{{PAGE_URL_PREFIX}}", urlPrefix)
+    .replaceAll(
+      "{{GTAG_SCRIPT}}",
+      gtag
+        ? `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${gtag}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${gtag}');
+</script>`
+        : "",
+    );
 }
 
 function renderNavigationTemplate({

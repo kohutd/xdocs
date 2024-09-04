@@ -1,32 +1,34 @@
 import fs from "fs";
 import * as child_process from "node:child_process";
 import path from "path";
+import { parseArgv } from "./common.mjs";
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
-let inputFolder = process.argv[2];
-let outputFolder = process.argv[3];
-let themeFolder = process.argv[4];
+const { inputFolder, outputFolder, themeFolder } = parseArgv();
 
 if (!inputFolder) {
-  console.error("Необхідно вказати шлях до документації першим параметром");
+  console.error("Необхідно вказати шлях до документації параметром --вхід=");
   process.exit(1);
 }
 
 if (!outputFolder) {
-  console.error("Необхідно вказати шлях до вихідної папки другим параметром");
+  console.error("Необхідно вказати шлях до вихідної папки параметром --вихід=");
   process.exit(1);
 }
 
 if (!themeFolder) {
-  console.error("Необхідно вказати шлях до теми третім параметром");
+  console.error("Необхідно вказати шлях до теми параметром --вигляд=");
   process.exit(1);
 }
 
 function generate() {
   console.log("Генерація...");
-  child_process.execSync(`node ${__dirname}/generate.mjs ${inputFolder} ${outputFolder} ${themeFolder}`, { stdio: "inherit" });
+  child_process.execSync(
+    `node ${__dirname}/generate.mjs ${inputFolder} ${outputFolder} ${themeFolder}`,
+    { stdio: "inherit" },
+  );
   console.log("Готово");
 }
 

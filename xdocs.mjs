@@ -9,8 +9,17 @@ const __dirname = path.dirname(__filename);
 const command = process.argv[2];
 const args = process.argv.slice(3);
 
-if (command === "generate") {
-  child_process.execSync(`node ${__dirname}/generate.mjs ${args.join(" ")}`, { stdio: "inherit" });
-} else if (command === "watch") {
-  child_process.execSync(`node ${__dirname}/watch.mjs ${args.join(" ")}`, { stdio: "inherit" });
+if (command === "перетворити") {
+  child_process.execSync(`node ${__dirname}/generate.mjs ${args.join(" ")}`, {
+    stdio: "inherit",
+  });
+} else if (command === "стежити") {
+  child_process.execSync(`node ${__dirname}/watch.mjs ${args.join(" ")}`, {
+    stdio: "inherit",
+  });
+} else {
+  console.error(
+    "докс <перетворити|стежити> [--вхід=,--вихід=,--вигляд=, --ґтег=]",
+  );
+  process.exit(0);
 }
