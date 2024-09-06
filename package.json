@@ -1,6 +1,6 @@
 {
   "name": "xdocs",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "XDocs Generator",
   "main": "xdocs.mjs",
   "scripts": {
@@ -14,5 +14,8 @@
   "license": "MIT",
   "devDependencies": {
     "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "node-html-parser": "^6.1.13"
   }
 }

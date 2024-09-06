@@ -6,6 +6,7 @@ import hljs from "./libraries/highlight.js";
 import markdownIt from "./libraries/markdown-it.js";
 import child_process from "node:child_process";
 import { parseArgv } from "./common.mjs";
+import { parse } from "node-html-parser";
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
@@ -88,6 +89,7 @@ function renderPageTemplate({
   nextUrl,
   urlPrefix,
   searchIframeUrl,
+  metaDescription,
 } = {}) {
   return pageTemplateText
     .replaceAll(
@@ -126,7 +128,8 @@ function renderPageTemplate({
   gtag('config', '${gtag}');
 </script>`
         : "",
-    );
+    )
+    .replaceAll("{{META_DESCRIPTION}}", metaDescription ? metaDescription : "");
 }
 
 function renderNavigationTemplate({
@@ -218,6 +221,7 @@ function renderPage(page, prevPage, nextPage) {
   const pageNameInTitle = page["назва_в_заголовку"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
+  let metaDescription = page["опис"];
 
   currentPageData = {};
   currentPageData.page = page;
@@ -231,6 +235,12 @@ function renderPage(page, prevPage, nextPage) {
 
   const pageMarkdownContent = fs.readFileSync(pageFile, "utf8");
   const pageHtmlContent = md.render(pageMarkdownContent);
+
+  if (metaDescription === 0) {
+    const root = parse(pageHtmlContent);
+    const firstParagraph = root.querySelector("p");
+    metaDescription = firstParagraph ? firstParagraph.text : "";
+  }
 
   searchData.push({
     title: pageName,
@@ -308,6 +318,7 @@ function renderPage(page, prevPage, nextPage) {
     nextUrl: nextPage ? `${urlPrefix}${nextPage["вихід"]}` : "",
     urlPrefix: urlPrefix,
     searchIframeUrl: urlPrefix + "ресурси/search.html",
+    metaDescription,
   });
 
   fs.writeFileSync(pageOut, renderedPage);
