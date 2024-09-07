@@ -80,6 +80,7 @@ function renderPageTemplate({
   icon,
   iconSize,
   favicon,
+  faviconPng,
   title,
   head,
   navigation,
@@ -100,6 +101,7 @@ function renderPageTemplate({
     )
     .replaceAll("{{PAGE_ICON_SIZE}}", `${iconSize}px`)
     .replaceAll("{{PAGE_FAVICON}}", favicon)
+    .replaceAll("{{PAGE_FAVICON_PNG}}", faviconPng)
     .replaceAll("{{PAGE_TITLE}}", title)
     .replaceAll("{{PAGE_HEAD}}", head)
     .replaceAll("{{PAGE_NAVIGATION}}", navigation)
@@ -306,6 +308,7 @@ function renderPage(page, prevPage, nextPage) {
     icon: pageIcon ? urlPrefix + pageIcon : undefined,
     iconSize: page["висота_іконки"] ? page["висота_іконки"] : 50,
     favicon: urlPrefix + documentationFile["логотип"],
+    faviconPng: urlPrefix + documentationFile["логотип_png"],
     title:
       pageNameInTitle != null
         ? pageNameInTitle.length
