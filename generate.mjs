@@ -222,6 +222,8 @@ function renderPage(page, prevPage, nextPage) {
   const pageFile = `${inputFolder}/${page["файл"]}`;
   const pageOut = `${outputFolder}/${page["вихід"]}`;
   let metaDescription = page["опис"];
+  const noPrev = page["без_відступу"] || false;
+  const noNext = page["без_наступу"] || false;
 
   currentPageData = {};
   currentPageData.page = page;
@@ -314,8 +316,8 @@ function renderPage(page, prevPage, nextPage) {
     navigation: renderedNavigation,
     content: pageHtmlContent,
     scripts: bodyScripts,
-    prevUrl: prevPage ? `${urlPrefix}${prevPage["вихід"]}` : "",
-    nextUrl: nextPage ? `${urlPrefix}${nextPage["вихід"]}` : "",
+    prevUrl: !noPrev && prevPage ? `${urlPrefix}${prevPage["вихід"]}` : "",
+    nextUrl: !noNext && nextPage ? `${urlPrefix}${nextPage["вихід"]}` : "",
     urlPrefix: urlPrefix,
     searchIframeUrl: urlPrefix + "ресурси/search.html",
     metaDescription,
