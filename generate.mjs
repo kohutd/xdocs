@@ -7,6 +7,10 @@ import markdownIt from "./libraries/markdown-it.js";
 import child_process from "node:child_process";
 import { parseArgv } from "./common.mjs";
 import { parse } from "node-html-parser";
+import { codeToHtml, createHighlighter } from "shiki";
+
+global.shikiCodeToHtml = codeToHtml;
+global.shikiCreateHighlighter = createHighlighter;
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
@@ -331,6 +335,10 @@ function renderPage(page, prevPage, nextPage) {
 
 if (fs.existsSync(`${themeFolder}/розширити.js`)) {
   eval(fs.readFileSync(`${themeFolder}/розширити.js`, "utf8"));
+}
+
+if (typeof global.extendAsync === "function") {
+  await global.extendAsync();
 }
 
 documentationFile["сторінки"]
