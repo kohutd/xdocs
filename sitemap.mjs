@@ -53,6 +53,7 @@ function render(node, prefix = "") {
       render(value, `${prefix}/${key}`);
     } else {
       if (
+        key !== "404.html" &&
         key.endsWith(".html") &&
         prefix.indexOf("/ресурси") === -1 &&
         !prefix.startsWith("ресурси/")
