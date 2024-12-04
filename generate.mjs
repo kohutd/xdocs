@@ -97,6 +97,9 @@ function renderPageTemplate({
   metaDescription,
   allowComments,
   commentsRepo,
+  commentsRepoId,
+  commentsCategory,
+  commentsCategoryId,
 } = {}) {
   return pageTemplateText
     .replaceAll(
@@ -140,7 +143,7 @@ function renderPageTemplate({
     .replaceAll(
       "{{PAGE_COMMENTS_TAG}}",
       allowComments
-        ? `<div class="XDocsPageContentComments" data-comments-repo="${commentsRepo}"></div>`
+        ? `<div class="XDocsPageContentComments" data-comments-repo="${commentsRepo}" data-comments-repo-id="${commentsRepoId}" data-comments-category="${commentsCategory}" data-comments-category-id="${commentsCategoryId}"></div>`
         : "",
     )
     .replaceAll("{{META_DESCRIPTION}}", metaDescription ? metaDescription : "");
@@ -338,6 +341,9 @@ function renderPage(page, prevPage, nextPage) {
     metaDescription,
     allowComments: page["дозволити_коментарі"],
     commentsRepo: page["репозиторій_коментарів"],
+    commentsRepoId: page["ід_репозиторія_коментарів"],
+    commentsCategory: page["категорія_коментарів"],
+    commentsCategoryId: page["ід_категорії_коментарів"],
   });
 
   fs.writeFileSync(pageOut, renderedPage);
