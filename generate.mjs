@@ -95,6 +95,8 @@ function renderPageTemplate({
   urlPrefix,
   searchIframeUrl,
   metaDescription,
+  allowComments,
+  commentsRepo,
 } = {}) {
   return pageTemplateText
     .replaceAll(
@@ -133,6 +135,12 @@ function renderPageTemplate({
 
   gtag('config', '${gtag}');
 </script>`
+        : "",
+    )
+    .replaceAll(
+      "{{PAGE_COMMENTS_TAG}}",
+      allowComments
+        ? `<div class="XDocsPageContentComments" data-comments-repo="${commentsRepo}"></div>`
         : "",
     )
     .replaceAll("{{META_DESCRIPTION}}", metaDescription ? metaDescription : "");
@@ -328,6 +336,8 @@ function renderPage(page, prevPage, nextPage) {
     urlPrefix: urlPrefix,
     searchIframeUrl: urlPrefix + "ресурси/search.html",
     metaDescription,
+    allowComments: page["дозволити_коментарі"],
+    commentsRepo: page["репозиторій_коментарів"],
   });
 
   fs.writeFileSync(pageOut, renderedPage);
