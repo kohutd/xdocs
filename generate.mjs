@@ -230,6 +230,8 @@ function repeatString(str, count) {
 
 let searchData = [];
 
+let latestInteresting = [];
+
 let currentPageData = undefined;
 
 function renderPage(page, prevPage, nextPage) {
@@ -262,7 +264,12 @@ function renderPage(page, prevPage, nextPage) {
   }
 
   searchData.push({
-    title: pageName,
+    title:
+      pageNameInTitle != null
+        ? pageNameInTitle.length
+          ? `${pageNameInTitle} | ${documentationFile["назва"]}`
+          : documentationFile["назва"]
+        : `${pageName} | ${documentationFile["назва"]}`,
     content: pageMarkdownContent,
     path: page["вихід"],
   });
@@ -271,6 +278,13 @@ function renderPage(page, prevPage, nextPage) {
   currentPageData.pageHtmlContent = pageHtmlContent;
 
   const urlPrefix = `${repeatString(".", countSlashes(page["вихід"]) + 1)}/`;
+
+  if (page["останнє_цікаве"]) {
+    latestInteresting.push({
+      title: pageName,
+      path: `${page["вихід"]}`,
+    });
+  }
 
   const headStyles = pageHeadStyles
     .map((style) => `<link rel="stylesheet" href="${urlPrefix}${style}">`)
@@ -377,4 +391,12 @@ function renderSearch() {
   fs.writeFileSync(`${outputFolder}/ресурси/search.html`, searchTemplate);
 }
 
+function renderLatestInteresting() {
+  fs.writeFileSync(
+    `${outputFolder}/останнє-цікаве.json`,
+    JSON.stringify(latestInteresting),
+  );
+}
+
 renderSearch();
+renderLatestInteresting();
