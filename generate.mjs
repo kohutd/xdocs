@@ -281,8 +281,8 @@ function renderPage(page, prevPage, nextPage) {
 
   if (page["останнє_цікаве"]) {
     latestInteresting.push({
-      title: pageName,
-      path: `${page["вихід"]}`,
+      заголовок: pageName,
+      шлях: `${page["вихід"]}`,
     });
   }
 
