@@ -156,6 +156,7 @@ function renderNavigationTemplate({
   footerImage,
   footerImageUrl,
   footerText,
+  ikzn,
 } = {}) {
   return navigationTemplateText
     .replaceAll("{{PAGE_NAVIGATION_LOGO_URL}}", logoUrl)
@@ -163,7 +164,8 @@ function renderNavigationTemplate({
     .replaceAll("{{PAGE_NAVIGATION_LINKS}}", links)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE}}", footerImage)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE_URL}}", footerImageUrl)
-    .replaceAll("{{PAGE_NAVIGATION_FOOTER_TEXT}}", footerText);
+    .replaceAll("{{PAGE_NAVIGATION_FOOTER_TEXT}}", footerText)
+    .replaceAll("{{PAGE_NAVIGATION_IKZN}}", ikzn);
 }
 
 function renderNavigationItemLinkTemplate({ name, url, active } = {}) {
@@ -263,16 +265,18 @@ function renderPage(page, prevPage, nextPage) {
     metaDescription = firstParagraph ? firstParagraph.text : "";
   }
 
-  searchData.push({
-    title:
-      pageNameInTitle != null
-        ? pageNameInTitle.length
-          ? `${pageNameInTitle} | ${documentationFile["назва"]}`
-          : documentationFile["назва"]
-        : `${pageName} | ${documentationFile["назва"]}`,
-    content: pageMarkdownContent,
-    path: page["вихід"],
-  });
+  if (page["доступно_в_пошуку"] !== false) {
+    searchData.push({
+      title:
+        pageNameInTitle != null
+          ? pageNameInTitle.length
+            ? `${pageNameInTitle} | ${documentationFile["назва"]}`
+            : documentationFile["назва"]
+          : `${pageName} | ${documentationFile["назва"]}`,
+      content: pageMarkdownContent,
+      path: page["вихід"],
+    });
+  }
 
   currentPageData.pageMarkdownContent = pageMarkdownContent;
   currentPageData.pageHtmlContent = pageHtmlContent;
@@ -299,6 +303,7 @@ function renderPage(page, prevPage, nextPage) {
   const renderedNavigation = renderNavigationTemplate({
     logoUrl: documentationFile["головна"],
     logoImage: urlPrefix + documentationFile["логотип"],
+    ikzn: urlPrefix + documentationFile["ікзн"],
     links: documentationFile["сторінки"]
       .map((documentationPage) => {
         if (documentationPage["сторінки"]) {
@@ -371,10 +376,22 @@ if (typeof global.extendAsync === "function") {
   await global.extendAsync();
 }
 
-documentationFile["сторінки"]
+(documentationFile["сторінки"] || [])
   .flatMap((page) => {
     if (page["сторінки"]) {
       return page["сторінки"];
+    } else {
+      return page;
+    }
+  })
+  .forEach((page, index, array) => {
+    renderPage(page, array[index - 1], array[index + 1]);
+  });
+
+(documentationFile["невидимі_сторінки"] || [])
+  .flatMap((page) => {
+    if (page["невидимі_сторінки"]) {
+      return page["невидимі_сторінки"];
     } else {
       return page;
     }
