@@ -156,7 +156,6 @@ function renderNavigationTemplate({
   footerImage,
   footerImageUrl,
   footerText,
-  ikzn,
 } = {}) {
   return navigationTemplateText
     .replaceAll("{{PAGE_NAVIGATION_LOGO_URL}}", logoUrl)
@@ -164,8 +163,7 @@ function renderNavigationTemplate({
     .replaceAll("{{PAGE_NAVIGATION_LINKS}}", links)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE}}", footerImage)
     .replaceAll("{{PAGE_NAVIGATION_FOOTER_IMAGE_URL}}", footerImageUrl)
-    .replaceAll("{{PAGE_NAVIGATION_FOOTER_TEXT}}", footerText)
-    .replaceAll("{{PAGE_NAVIGATION_IKZN}}", ikzn);
+    .replaceAll("{{PAGE_NAVIGATION_FOOTER_TEXT}}", footerText);
 }
 
 function renderNavigationItemLinkTemplate({ name, url, active } = {}) {
@@ -303,7 +301,6 @@ function renderPage(page, prevPage, nextPage) {
   const renderedNavigation = renderNavigationTemplate({
     logoUrl: documentationFile["головна"],
     logoImage: urlPrefix + documentationFile["логотип"],
-    ikzn: urlPrefix + documentationFile["ікзн"],
     links: documentationFile["сторінки"]
       .map((documentationPage) => {
         if (documentationPage["сторінки"]) {
