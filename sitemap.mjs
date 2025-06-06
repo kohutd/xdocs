@@ -73,6 +73,7 @@ for (const url of sitemap) {
   xml += `
   <url>
     <loc>${url}</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
   </url>`;
 }
 
