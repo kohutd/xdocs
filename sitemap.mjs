@@ -22,19 +22,50 @@ if (!domain) {
   process.exit(1);
 }
 
+// Read ignore file
+const ignoreFilePath = path.join(inputFolder, ".xdocssitemapignore");
+let ignoreRules = new Set();
+
+if (fs.existsSync(ignoreFilePath)) {
+  const content = fs.readFileSync(ignoreFilePath, "utf-8");
+  ignoreRules = new Set(
+    content
+      .split("\n")
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith("#")) // Remove empty and comment lines
+  );
+}
+
+// Helper to check if a path should be ignored
+function isIgnored(relativePath) {
+  for (const rule of ignoreRules) {
+    if (
+      relativePath === rule ||                  // Exact match
+      relativePath.startsWith(rule + "/") ||    // Directory match
+      relativePath.endsWith(rule)               // File pattern match
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const tree = { children: {} };
 
-function walk(dir, parent) {
+function walk(dir, parent, relativePath = "") {
   const files = fs.readdirSync(dir);
 
   for (const file of files) {
     const fullPath = path.join(dir, file);
+    const relPath = path.join(relativePath, file);
+    if (isIgnored(relPath)) continue;
+
     const stats = fs.statSync(fullPath);
 
     if (stats.isDirectory()) {
       const node = { children: {} };
       parent.children[file] = node;
-      walk(fullPath, node);
+      walk(fullPath, node, relPath);
     } else {
       parent.children[file] = null;
     }
@@ -47,18 +78,26 @@ walk(inputFolder, tree);
 
 const sitemap = [];
 
-function render(node, prefix = "") {
+function render(node, prefix = "", absolutePath = inputFolder) {
   for (const [key, value] of Object.entries(node.children)) {
+    const currentPath = prefix ? `${prefix}/${key}` : key;
+    const fullPath = path.join(absolutePath, key);
+
     if (value) {
-      render(value, `${prefix}/${key}`);
+      render(value, currentPath, fullPath);
     } else {
       if (
         key !== "404.html" &&
         key.endsWith(".html") &&
-        prefix.indexOf("/ресурси") === -1 &&
-        !prefix.startsWith("ресурси/")
+        !currentPath.includes("/ресурси") &&
+        !currentPath.startsWith("ресурси/") &&
+        !isIgnored(currentPath)
       ) {
-        sitemap.push("https://" + path.join(domain, prefix, key));
+        const stat = fs.statSync(fullPath);
+        sitemap.push({
+          url: "https://" + path.join(domain, currentPath),
+          lastmod: stat.mtime.toISOString()
+        });
       }
     }
   }
@@ -69,11 +108,11 @@ render(tree);
 let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-for (const url of sitemap) {
+for (const { url, lastmod } of sitemap) {
   xml += `
   <url>
     <loc>${url}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${lastmod}</lastmod>
   </url>`;
 }
 
