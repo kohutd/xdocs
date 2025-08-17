@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import fs from "fs";
+import { parse } from "node-html-parser";
+import child_process from "node:child_process";
 import path from "path";
+import { codeToHtml, createHighlighter } from "shiki";
+import { parseArgv } from "./common.mjs";
 import hljs from "./libraries/highlight.js";
 import markdownIt from "./libraries/markdown-it.js";
-import child_process from "node:child_process";
-import { parseArgv } from "./common.mjs";
-import { parse } from "node-html-parser";
-import { codeToHtml, createHighlighter } from "shiki";
 
 global.shikiCodeToHtml = codeToHtml;
 global.shikiCreateHighlighter = createHighlighter;
@@ -100,6 +100,7 @@ function renderPageTemplate({
   commentsRepoId,
   commentsCategory,
   commentsCategoryId,
+  noindex
 } = {}) {
   return pageTemplateText
     .replaceAll(
@@ -146,7 +147,8 @@ function renderPageTemplate({
         ? `<div class="XDocsPageContentComments" data-comments-repo="${commentsRepo}" data-comments-repo-id="${commentsRepoId}" data-comments-category="${commentsCategory}" data-comments-category-id="${commentsCategoryId}"></div>`
         : "",
     )
-    .replaceAll("{{META_DESCRIPTION}}", metaDescription ? metaDescription : "");
+    .replaceAll("{{META_DESCRIPTION}}", metaDescription ? metaDescription : "")
+    .replaceAll("{{PAGE_NOINDEX}}", noindex ? noindex : "");
 }
 
 function renderNavigationTemplate({
@@ -360,6 +362,7 @@ function renderPage(page, prevPage, nextPage) {
     commentsRepoId: page["ід_репозиторія_коментарів"],
     commentsCategory: page["категорія_коментарів"],
     commentsCategoryId: page["ід_категорії_коментарів"],
+    noindex: page["ігнорувати_для_роботів"] ? '<meta name="robots" content="noindex, nofollow">' : '',
   });
 
   fs.writeFileSync(pageOut, renderedPage);
