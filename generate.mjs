@@ -100,13 +100,20 @@ function renderPageTemplate({
   commentsRepoId,
   commentsCategory,
   commentsCategoryId,
-  noindex
+  noindex,
+  misto
 } = {}) {
   return pageTemplateText
     .replaceAll(
       "{{PAGE_ICON}}",
       icon
         ? `<div class="XDocsPageIcon"><img height="${iconSize}px" src="${icon}" alt=""></div>`
+        : "",
+    )
+    .replaceAll(
+      "{{PAGE_MISTO}}",
+      misto
+        ? `<div class="XDocsPageMisto"><img src="${misto}" alt=""></div>`
         : "",
     )
     .replaceAll("{{PAGE_ICON_SIZE}}", `${iconSize}px`)
@@ -238,6 +245,7 @@ let currentPageData = undefined;
 
 function renderPage(page, prevPage, nextPage) {
   const pageIcon = page["іконка"];
+  const pageMisto = page["місто"];
   const pageName = page["назва"];
   const pageNameInTitle = page["назва_в_заголовку"];
   const pageFile = `${inputFolder}/${page["файл"]}`;
@@ -363,6 +371,7 @@ function renderPage(page, prevPage, nextPage) {
     commentsCategory: page["категорія_коментарів"],
     commentsCategoryId: page["ід_категорії_коментарів"],
     noindex: page["ігнорувати_для_роботів"] ? '<meta name="robots" content="noindex, nofollow">' : '',
+    misto: pageMisto ? urlPrefix + pageMisto : undefined,
   });
 
   fs.writeFileSync(pageOut, renderedPage);
