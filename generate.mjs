@@ -14,6 +14,9 @@ global.shikiCreateHighlighter = createHighlighter;
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
+const packageVersion = JSON.parse(
+  fs.readFileSync(`${__dirname}/package.json`, "utf8"),
+).version;
 
 const { inputFolder, outputFolder, themeFolder, gtag } = parseArgv();
 
@@ -229,11 +232,14 @@ if (fs.existsSync(`${themeFolder}/ресурси/тема.scss`)) {
 }
 
 const pageHeadStyles = [
-  "ресурси/ядро/highlight-atom-one-dark.css",
-  "ресурси/тема/тема.css",
+  `ресурси/ядро/highlight-atom-one-dark.css`,
+  `ресурси/тема/тема.css?версія=${packageVersion}`,
 ];
 const pageHeadScripts = [];
-const pageBodyScripts = ["ресурси/ядро/ядро.js", "ресурси/тема/тема.js"];
+const pageBodyScripts = [
+  `ресурси/ядро/ядро.js?версія=${packageVersion}`,
+  `ресурси/тема/тема.js?версія=${packageVersion}`,
+];
 
 function countSlashes(str) {
   return str.split("/").length - 1;
