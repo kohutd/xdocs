@@ -101,7 +101,7 @@ function renderPageTemplate({
   commentsCategory,
   commentsCategoryId,
   noindex,
-  misto
+  misto,
 } = {}) {
   return pageTemplateText
     .replaceAll(
@@ -185,9 +185,15 @@ function renderNavigationItemLinkTemplate({ name, url, active } = {}) {
     );
 }
 
-function renderNavigationItemSubmenuTemplate({ name, items, expanded } = {}) {
+function renderNavigationItemSubmenuTemplate({
+  name,
+  expandedName,
+  items,
+  expanded,
+} = {}) {
   return navigationItemSubmenuTemplateText
     .replaceAll("{{PAGE_NAVIGATION_ITEM_SUBMENU_NAME}}", name)
+    .replaceAll("{{PAGE_NAVIGATION_ITEM_SUBMENU_EXPANDED_NAME}}", expandedName)
     .replaceAll("{{PAGE_NAVIGATION_ITEM_SUBMENU_ITEMS}}", items)
     .replaceAll(
       "{{PAGE_NAVIGATION_ITEM_SUBMENU_EXPANDED}}",
@@ -325,6 +331,7 @@ function renderPage(page, prevPage, nextPage) {
             .join("\n");
           return renderNavigationItemSubmenuTemplate({
             name: documentationPage["назва"],
+            expandedName: documentationPage["назва_відкрита"] || "",
             items: submenuLinks,
             expanded: documentationPage["сторінки"].some(
               (documentationSubpage) =>
@@ -370,7 +377,9 @@ function renderPage(page, prevPage, nextPage) {
     commentsRepoId: page["ід_репозиторія_коментарів"],
     commentsCategory: page["категорія_коментарів"],
     commentsCategoryId: page["ід_категорії_коментарів"],
-    noindex: page["ігнорувати_для_роботів"] ? '<meta name="robots" content="noindex, nofollow">' : '',
+    noindex: page["ігнорувати_для_роботів"]
+      ? '<meta name="robots" content="noindex, nofollow">'
+      : "",
     misto: pageMisto ? urlPrefix + pageMisto : undefined,
   });
 
