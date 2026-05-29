@@ -21,9 +21,13 @@ if (command === "перетворити") {
   child_process.execSync(`node ${__dirname}/sitemap.mjs ${args.join(" ")}`, {
     stdio: "inherit",
   });
+} else if (command === "код") {
+  child_process.execSync(`node ${__dirname}/code.mjs ${args.join(" ")}`, {
+    stdio: "inherit",
+  });
 } else {
   console.error(
-    "докс <перетворити|стежити|карта> [--вхід=,--вихід=,--вигляд=, --ґтег=]",
+    "докс <перетворити|стежити|карта|код> [--вхід=,--вихід=,--вигляд=,--назва=,--ґтег=]",
   );
   process.exit(0);
 }

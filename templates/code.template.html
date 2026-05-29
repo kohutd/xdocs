@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{PAGE_NAME}}</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --bg-sidebar: #0d1117;
+        --bg-titlebar: #0d1117;
+        --bg-hover: #6e76811a;
+        --bg-selected: #6e768166;
+        --border: #30363d;
+        --accent: #1f6feb;
+        --text: #e6edf3;
+        --text-muted: #8b949e;
+        --text-heading: #8b949e;
+        --folder-color: #d29922;
+        --file-color: #79c0ff;
+        --tree-text: #c9d1d9;
+        --sidebar-width: 260px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ─── Рядок заголовку ───────────────────────────────── */
+      .TitleBar {
+        height: 35px;
+        flex-shrink: 0;
+        background: var(--bg-titlebar);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        user-select: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .TitleBar-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        pointer-events: none;
+        max-width: calc(100% - 80px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .TitleBar-toggle {
+        position: absolute;
+        left: 8px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: none;
+        border: none;
+        border-radius: 3px;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+      }
+      .TitleBar-toggle:hover {
+        background: var(--bg-hover);
+        color: var(--text);
+      }
+
+      /* ─── Робоча область ─────────────────────────────────── */
+      .Workbench {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      /* ─── Бічна панель ─────────────────────────────────── */
+      .Sidebar {
+        width: var(--sidebar-width);
+        flex-shrink: 0;
+        background: var(--bg-sidebar);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .Sidebar-head {
+        height: 35px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 14px;
+      }
+
+      .Sidebar-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-heading);
+      }
+
+      /* ─── Дерево ─────────────────────────────────────────── */
+      .Tree {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 2px 0 8px;
+      }
+      .Tree::-webkit-scrollbar {
+        width: 8px;
+      }
+      .Tree::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .Tree::-webkit-scrollbar-thumb {
+        background: rgba(121, 121, 121, 0.35);
+        border-radius: 4px;
+      }
+      .Tree::-webkit-scrollbar-thumb:hover {
+        background: rgba(121, 121, 121, 0.6);
+      }
+
+      .TreeList {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .TreeItem {
+        list-style: none;
+      }
+
+      .TreeRow {
+        display: flex;
+        align-items: center;
+        height: 22px;
+        padding-right: 8px;
+        gap: 2px;
+        cursor: pointer;
+        user-select: none;
+        color: var(--tree-text);
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        outline: none;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .TreeRow:hover {
+        background: var(--bg-hover);
+      }
+      .TreeRow.is-selected {
+        background: var(--bg-selected);
+      }
+      .TreeRow:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: -1px;
+      }
+
+      .TreeRow-chevron {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition: transform 0.12s ease;
+      }
+      .TreeRow[aria-expanded="true"] .TreeRow-chevron {
+        transform: rotate(90deg);
+      }
+
+      .TreeRow-spacer {
+        flex-shrink: 0;
+        width: 16px;
+      }
+
+      .TreeRow-icon {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .TreeRow-icon svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
+
+      .TreeRow-label {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        line-height: 1;
+      }
+
+      .TreeChildren {
+        list-style: none;
+      }
+      .TreeChildren[hidden] {
+        display: none;
+      }
+
+      /* ─── Редактор ───────────────────────────────────────── */
+      .Editor {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+        overflow: hidden;
+      }
+
+      .Welcome {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: var(--text-muted);
+        pointer-events: none;
+      }
+      .Welcome-icon {
+        opacity: 0.12;
+      }
+      .Welcome-hint {
+        font-size: 14px;
+      }
+      .Welcome.is-hidden {
+        display: none;
+      }
+
+      .EditorFrame {
+        flex: 1;
+        min-height: 0;
+        border: none;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        display: none;
+        color-scheme: dark;
+      }
+      .EditorFrame.is-visible {
+        display: block;
+      }
+
+      /* ─── Мобільне накладення ──────────────────────────── */
+      .Overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.48);
+        z-index: 50;
+      }
+
+      /* ─── Адаптивність ──────────────────────────────────── */
+      @media (max-width: 680px) {
+        .TitleBar-toggle {
+          display: flex;
+        }
+
+        .Sidebar {
+          position: fixed;
+          top: 35px;
+          bottom: 22px;
+          left: 0;
+          z-index: 100;
+          transform: translateX(-100%);
+          transition: transform 0.2s ease;
+          box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+          border-right-color: rgba(255, 255, 255, 0.08);
+        }
+        .Sidebar.is-open {
+          transform: translateX(0);
+        }
+
+        .Overlay.is-visible {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="TitleBar">
+      <button
+        class="TitleBar-toggle"
+        id="sidebarToggle"
+        aria-label="Перемкнути провідник"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M1 3.5h14v1H1v-1zm0 4h14v1H1v-1zm0 4h14v1H1v-1z"
+          />
+        </svg>
+      </button>
+      <span class="TitleBar-label" id="titleLabel">{{PAGE_NAME}}</span>
+    </div>
+
+    <div class="Workbench">
+      <div class="Overlay" id="overlay"></div>
+
+      <aside class="Sidebar" id="sidebar" aria-label="Провідник">
+        <div class="Sidebar-head">
+          <span class="Sidebar-title">{{PAGE_NAME}}</span>
+        </div>
+        <nav class="Tree" id="tree"></nav>
+      </aside>
+
+      <main class="Editor">
+        <div class="Welcome" id="welcome">
+          <svg
+            class="Welcome-icon"
+            width="72"
+            height="72"
+            viewBox="0 0 72 72"
+            fill="none"
+            aria-hidden="true"
+          >
+            <rect
+              x="4"
+              y="4"
+              width="64"
+              height="64"
+              rx="6"
+              stroke="#cccccc"
+              stroke-width="3"
+            />
+            <path
+              d="M18 26h36M18 36h28M18 46h20"
+              stroke="#cccccc"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="Welcome-hint">Оберіть файл для перегляду</span>
+        </div>
+
+        <iframe
+          class="EditorFrame"
+          id="editorFrame"
+          title="Перегляд файлу"
+          sandbox="allow-scripts allow-same-origin"
+        ></iframe>
+      </main>
+    </div>
+
+    <script>
+      const TREE      = {{TREE}};
+      const ICONS     = {{ICONS}};
+      const PAGE_NAME = "{{PAGE_NAME}}";
+
+      const elTree       = document.getElementById("tree");
+      const elWelcome    = document.getElementById("welcome");
+      const elFrame      = document.getElementById("editorFrame");
+      const elTitleLabel = document.getElementById("titleLabel");
+      const elSidebar    = document.getElementById("sidebar");
+      const elOverlay    = document.getElementById("overlay");
+      const elToggle     = document.getElementById("sidebarToggle");
+
+      // шлях → { node, rowEl, ancestors[] }
+      const fileIndex = new Map();
+      let activeRow = null;
+
+      function ext(name) {
+        const i = name.lastIndexOf(".");
+        return i !== -1 ? name.slice(i + 1).toLowerCase() : "";
+      }
+
+      function resolveIcon(node) {
+        if (!ICONS) return null;
+        if (node.type === "folder") return ICONS["folder"] ?? null;
+        return ICONS[ext(node.name)] ?? ICONS[node.name] ?? ICONS["file"] ?? null;
+      }
+
+      function makeIconEl(node) {
+        const span = document.createElement("span");
+        const custom = resolveIcon(node);
+        if (custom) {
+          span.innerHTML = custom;
+          return span;
+        }
+        if (node.type === "folder") {
+          span.innerHTML = `<svg viewBox="0 0 16 16" fill="var(--folder-color)"><path d="M1.5 13.5h13a.5.5 0 00.5-.5V5a.5.5 0 00-.5-.5H7.5L6.15 3.15A.5.5 0 005.8 3H1.5a.5.5 0 00-.5.5v9.5a.5.5 0 00.5.5z"/></svg>`;
+        } else {
+          span.innerHTML = `<svg viewBox="0 0 16 16" fill="none"><path d="M4 2h6l3.5 3.5V14a.5.5 0 01-.5.5h-9A.5.5 0 013 14V2.5A.5.5 0 014 2z" stroke="var(--file-color)" stroke-width="1.2"/><path d="M10 2v3.5H13.5" stroke="var(--file-color)" stroke-width="1.2"/></svg>`;
+        }
+        return span;
+      }
+
+      function sortNodes(nodes) {
+        return [...nodes].sort((a, b) => {
+          if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
+          return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+        });
+      }
+
+      function buildList(nodes, depth, ancestors) {
+        const ul = document.createElement("ul");
+        ul.className = "TreeList";
+        for (const node of sortNodes(nodes)) {
+          ul.append(buildItem(node, depth, ancestors));
+        }
+        return ul;
+      }
+
+      function buildItem(node, depth, ancestors) {
+        const li = document.createElement("li");
+        li.className = "TreeItem";
+
+        const row = document.createElement("div");
+        row.className = "TreeRow";
+        row.setAttribute("tabindex", "0");
+        row.style.paddingLeft = `${6 + depth * 14}px`;
+
+        if (node.type === "folder") {
+          row.setAttribute("role", "treeitem");
+          row.setAttribute("aria-expanded", "false");
+
+          const chevron = document.createElement("span");
+          chevron.className = "TreeRow-chevron";
+          chevron.setAttribute("aria-hidden", "true");
+          chevron.innerHTML = `<svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M4 3l6 5-6 5V3z"/></svg>`;
+
+          const icon = makeIconEl(node);
+          icon.className = "TreeRow-icon";
+
+          const label = document.createElement("span");
+          label.className = "TreeRow-label";
+          label.textContent = node.name;
+
+          row.append(chevron, icon, label);
+
+          const children = document.createElement("ul");
+          children.className = "TreeChildren";
+          children.hidden = true;
+
+          for (const child of sortNodes(node.children || [])) {
+            children.append(buildItem(child, depth + 1, [...ancestors, row]));
+          }
+
+          const toggle = () => {
+            const open = row.getAttribute("aria-expanded") === "true";
+            row.setAttribute("aria-expanded", open ? "false" : "true");
+            children.hidden = open;
+          };
+          row.addEventListener("click", toggle);
+          row.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+
+          li.append(row, children);
+        } else {
+          row.setAttribute("role", "treeitem");
+
+          const spacer = document.createElement("span");
+          spacer.className = "TreeRow-spacer";
+
+          const icon = makeIconEl(node);
+          icon.className = "TreeRow-icon";
+
+          const label = document.createElement("span");
+          label.className = "TreeRow-label";
+          label.textContent = node.name;
+
+          row.append(spacer, icon, label);
+
+          fileIndex.set(node.path, { node, rowEl: row, ancestors });
+          row.addEventListener("click", () => navigate(node.path));
+          row.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); navigate(node.path); } });
+
+          li.append(row);
+        }
+
+        return li;
+      }
+
+      function navigate(path) {
+        const entry = fileIndex.get(path);
+        if (!entry) return;
+
+        // Розгорнути батьківські вузли
+        for (const anc of entry.ancestors) {
+          if (anc.getAttribute("aria-expanded") === "false") {
+            anc.setAttribute("aria-expanded", "true");
+            anc.nextElementSibling.hidden = false;
+          }
+        }
+
+        // Виділити рядок
+        if (activeRow) activeRow.classList.remove("is-selected");
+        activeRow = entry.rowEl;
+        activeRow.classList.add("is-selected");
+        activeRow.scrollIntoView({ block: "nearest" });
+
+        // Завантажити iframe
+        elFrame.src = path + ".html";
+        elFrame.classList.add("is-visible");
+        elWelcome.classList.add("is-hidden");
+
+        // Оновити заголовок
+        document.title = path;
+        elTitleLabel.textContent = path;
+
+        // Оновити хеш URL
+        const encoded = encodeURIComponent(path);
+        if (location.hash !== `#${encoded}`) {
+          history.replaceState(null, "", `#${encoded}`);
+        }
+
+        // Закрити мобільну бічну панель
+        if (window.innerWidth <= 680) {
+          elSidebar.classList.remove("is-open");
+          elOverlay.classList.remove("is-visible");
+        }
+      }
+
+      // Мобільна бічна панель
+      elToggle.addEventListener("click", () => {
+        elSidebar.classList.toggle("is-open");
+        elOverlay.classList.toggle("is-visible");
+      });
+      elOverlay.addEventListener("click", () => {
+        elSidebar.classList.remove("is-open");
+        elOverlay.classList.remove("is-visible");
+      });
+
+      // Побудувати дерево
+      elTree.append(buildList(TREE.children || [], 0, []));
+
+      // Відновити з хешу
+      function openFromHash() {
+        const hash = location.hash.slice(1);
+        if (!hash) return;
+        const path = decodeURIComponent(hash);
+        if (fileIndex.has(path)) navigate(path);
+      }
+
+      openFromHash();
+      window.addEventListener("hashchange", openFromHash);
+    </script>
+  </body>
+</html>

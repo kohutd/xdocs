@@ -18,14 +18,14 @@ const packageVersion = JSON.parse(
   fs.readFileSync(`${__dirname}/package.json`, "utf8"),
 ).version;
 
-const { inputFolder, outputFolder, themeFolder, gtag } = parseArgv();
+const { input, output, themeFolder, gtag } = parseArgv();
 
-if (!inputFolder) {
+if (!input) {
   console.error("Необхідно вказати шлях до документації параметром --вхід=");
   process.exit(0);
 }
 
-if (!outputFolder) {
+if (!output) {
   console.error("Необхідно вказати шлях до вихідної папки параметром --вихід=");
   process.exit(0);
 }
@@ -52,10 +52,7 @@ const md = markdownIt({
   },
 });
 
-const documentationFileText = fs.readFileSync(
-  `${inputFolder}/докс.json`,
-  "utf8",
-);
+const documentationFileText = fs.readFileSync(`${input}/докс.json`, "utf8");
 const documentationFile = JSON.parse(documentationFileText);
 
 const pageTemplateText = fs.readFileSync(
@@ -214,21 +211,21 @@ function renderNavigationItemSubmenuLinkTemplate({ name, url, active } = {}) {
     );
 }
 
-fs.mkdirSync(outputFolder, { recursive: true });
-fs.mkdirSync(`${outputFolder}/ресурси`, { recursive: true });
+fs.mkdirSync(output, { recursive: true });
+fs.mkdirSync(`${output}/ресурси`, { recursive: true });
 
-fs.cpSync(`${__dirname}/ядро`, `${outputFolder}/ресурси/ядро`, {
+fs.cpSync(`${__dirname}/ядро`, `${output}/ресурси/ядро`, {
   recursive: true,
 });
-fs.cpSync(`${themeFolder}/ресурси`, `${outputFolder}/ресурси/тема`, {
+fs.cpSync(`${themeFolder}/ресурси`, `${output}/ресурси/тема`, {
   recursive: true,
 });
 if (fs.existsSync(`${themeFolder}/ресурси/тема.scss`)) {
   child_process.execSync(
-    `sass ${themeFolder}/ресурси/тема.scss ${outputFolder}/ресурси/тема/тема.css`,
+    `sass ${themeFolder}/ресурси/тема.scss ${output}/ресурси/тема/тема.css`,
     { stdio: "inherit" },
   );
-  fs.rmSync(`${outputFolder}/ресурси/тема/тема.scss`, { force: true });
+  fs.rmSync(`${output}/ресурси/тема/тема.scss`, { force: true });
 }
 
 const pageHeadStyles = [
@@ -260,8 +257,8 @@ function renderPage(page, prevPage, nextPage) {
   const pageMisto = page["місто"];
   const pageName = page["назва"];
   const pageNameInTitle = page["назва_в_заголовку"];
-  const pageFile = `${inputFolder}/${page["файл"]}`;
-  const pageOut = `${outputFolder}/${page["вихід"]}`;
+  const pageFile = `${input}/${page["файл"]}`;
+  const pageOut = `${output}/${page["вихід"]}`;
   let metaDescription = page["опис"];
   const noPrev = page["без_відступу"] || false;
   const noNext = page["без_наступу"] || false;
@@ -429,12 +426,12 @@ function renderSearch() {
     "{{PAGE_SEARCH_DATA}}",
     JSON.stringify(searchData).replaceAll("\\", "\\\\").replaceAll('"', '\\"'),
   );
-  fs.writeFileSync(`${outputFolder}/ресурси/search.html`, searchTemplate);
+  fs.writeFileSync(`${output}/ресурси/search.html`, searchTemplate);
 }
 
 function renderLatestInteresting() {
   fs.writeFileSync(
-    `${outputFolder}/останнє-цікаве.json`,
+    `${output}/останнє-цікаве.json`,
     JSON.stringify(latestInteresting),
   );
 }

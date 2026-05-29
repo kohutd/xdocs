@@ -1,18 +1,18 @@
+import fs from "fs";
 import path from "path";
 import { parseArgv } from "./common.mjs";
-import fs from "fs";
 
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
-const { inputFolder, outputFolder, domain } = parseArgv();
+const { input, output, domain } = parseArgv();
 
-if (!inputFolder) {
+if (!input) {
   console.error("Необхідно вказати шлях до документації параметром --вхід=");
   process.exit(1);
 }
 
-if (!outputFolder) {
+if (!output) {
   console.error("Необхідно вказати шлях до вихідної папки параметром --вихід=");
   process.exit(1);
 }
@@ -23,7 +23,7 @@ if (!domain) {
 }
 
 // Read ignore file
-const ignoreFilePath = path.join(inputFolder, ".xdocssitemapignore");
+const ignoreFilePath = path.join(input, ".xdocssitemapignore");
 let ignoreRules = new Set();
 
 if (fs.existsSync(ignoreFilePath)) {
@@ -31,8 +31,8 @@ if (fs.existsSync(ignoreFilePath)) {
   ignoreRules = new Set(
     content
       .split("\n")
-      .map(line => line.trim())
-      .filter(line => line && !line.startsWith("#")) // Remove empty and comment lines
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith("#")), // Remove empty and comment lines
   );
 }
 
@@ -40,9 +40,9 @@ if (fs.existsSync(ignoreFilePath)) {
 function isIgnored(relativePath) {
   for (const rule of ignoreRules) {
     if (
-      relativePath === rule ||                  // Exact match
-      relativePath.startsWith(rule + "/") ||    // Directory match
-      relativePath.endsWith(rule)               // File pattern match
+      relativePath === rule || // Exact match
+      relativePath.startsWith(rule + "/") || // Directory match
+      relativePath.endsWith(rule) // File pattern match
     ) {
       return true;
     }
@@ -74,11 +74,11 @@ function walk(dir, parent, relativePath = "") {
   return parent;
 }
 
-walk(inputFolder, tree);
+walk(input, tree);
 
 const sitemap = [];
 
-function render(node, prefix = "", absolutePath = inputFolder) {
+function render(node, prefix = "", absolutePath = input) {
   for (const [key, value] of Object.entries(node.children)) {
     const currentPath = prefix ? `${prefix}/${key}` : key;
     const fullPath = path.join(absolutePath, key);
@@ -96,7 +96,7 @@ function render(node, prefix = "", absolutePath = inputFolder) {
         const stat = fs.statSync(fullPath);
         sitemap.push({
           url: "https://" + path.join(domain, currentPath),
-          lastmod: stat.mtime.toISOString()
+          lastmod: stat.mtime.toISOString(),
         });
       }
     }
@@ -119,4 +119,4 @@ for (const { url, lastmod } of sitemap) {
 xml += `
 </urlset>`;
 
-fs.writeFileSync(`${outputFolder}/sitemap.xml`, xml);
+fs.writeFileSync(`${output}/sitemap.xml`, xml);

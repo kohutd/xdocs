@@ -6,14 +6,14 @@ import { parseArgv } from "./common.mjs";
 const __filename = new URL(import.meta.url).pathname;
 const __dirname = path.dirname(__filename);
 
-const { inputFolder, outputFolder, themeFolder } = parseArgv();
+const { input, output, themeFolder } = parseArgv();
 
-if (!inputFolder) {
+if (!input) {
   console.error("Необхідно вказати шлях до документації параметром --вхід=");
   process.exit(1);
 }
 
-if (!outputFolder) {
+if (!output) {
   console.error("Необхідно вказати шлях до вихідної папки параметром --вихід=");
   process.exit(1);
 }
@@ -26,7 +26,7 @@ if (!themeFolder) {
 function generate() {
   console.log("Генерація...");
   child_process.execSync(
-    `node ${__dirname}/generate.mjs ${inputFolder} ${outputFolder} ${themeFolder}`,
+    `node ${__dirname}/generate.mjs ${input} ${output} ${themeFolder}`,
     { stdio: "inherit" },
   );
   console.log("Готово");
@@ -34,7 +34,7 @@ function generate() {
 
 generate();
 
-[inputFolder, themeFolder, __dirname].forEach((folder) => {
+[input, themeFolder, __dirname].forEach((folder) => {
   fs.watch(folder, { recursive: true }, (eventType, filename) => {
     if (filename) {
       if (!filename.endsWith("~")) {
