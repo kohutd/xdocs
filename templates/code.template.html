@@ -379,6 +379,26 @@
       <div class="TitleBar-actions">
         <a
           class="TitleBar-action"
+          id="versionsBtn"
+          href="{{VERSIONS_URL}}"
+          aria-label="Версії"
+          title="Версії"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"
+            />
+          </svg>
+        </a>
+        <a
+          class="TitleBar-action"
           id="downloadBtn"
           href="{{DOWNLOAD}}"
           download
@@ -659,12 +679,15 @@
       });
 
       // Показати/сховати кнопки дій
-      const DOWNLOAD = "{{DOWNLOAD}}";
-      const GITHUB   = "{{GITHUB}}";
+      const DOWNLOAD     = "{{DOWNLOAD}}";
+      const GITHUB       = "{{GITHUB}}";
+      const VERSIONS_URL = "{{VERSIONS_URL}}";
       const elGithubBtn   = document.getElementById("githubBtn");
       const elDownloadBtn = document.getElementById("downloadBtn");
-      if (!GITHUB)   elGithubBtn.hidden   = true;
-      if (!DOWNLOAD) elDownloadBtn.hidden = true;
+      const elVersionsBtn = document.getElementById("versionsBtn");
+      if (!GITHUB)       elGithubBtn.hidden   = true;
+      if (!DOWNLOAD)     elDownloadBtn.hidden = true;
+      if (!VERSIONS_URL) elVersionsBtn.hidden = true;
 
       // Побудувати дерево
       elTree.append(buildList(TREE.children || [], 0, []));

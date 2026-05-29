@@ -7,6 +7,7 @@ export function parseArgv() {
   let title;
   let download;
   let github;
+  let versionsUrl;
 
   const argv = process.argv.slice(2);
 
@@ -27,8 +28,20 @@ export function parseArgv() {
       download = argv[i].split("=")[1];
     } else if (argv[i].startsWith("--гітхаб")) {
       github = argv[i].split("=")[1];
+    } else if (argv[i].startsWith("--версії")) {
+      versionsUrl = argv[i].split("=")[1];
     }
   }
 
-  return { input, output, themeFolder, gtag, domain, title, download, github };
+  return {
+    input,
+    output,
+    themeFolder,
+    gtag,
+    domain,
+    title,
+    download,
+    github,
+    versionsUrl,
+  };
 }

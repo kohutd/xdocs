@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const cwd = process.cwd();
 
-const { input, output, title, download, github } = parseArgv();
+const { input, output, title, download, github, versionsUrl } = parseArgv();
 
 let highlighter = await createHighlighter({
   themes: ["github-dark-default"],
@@ -124,6 +124,7 @@ const codeOutput = codeTemplate
   .replaceAll("{{TREE}}", JSON.stringify(jsonTree))
   .replaceAll("{{ICONS}}", JSON.stringify({}))
   .replaceAll("{{DOWNLOAD}}", download)
-  .replaceAll("{{GITHUB}}", github);
+  .replaceAll("{{GITHUB}}", github)
+  .replaceAll("{{VERSIONS_URL}}", versionsUrl);
 
 fs.writeFileSync(`${output}/index.html`, codeOutput);
