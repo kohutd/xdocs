@@ -258,6 +258,7 @@ function renderPage(page, prevPage, nextPage) {
   const pageName = page["назва"];
   const pageNameInTitle = page["назва_в_заголовку"];
   const pageFile = `${input}/${page["файл"]}`;
+  const pageUrl = `${page["укр"]}`;
   const pageOut = `${output}/${page["вихід"]}`;
   let metaDescription = page["опис"];
   const noPrev = page["без_відступу"] || false;
@@ -269,6 +270,7 @@ function renderPage(page, prevPage, nextPage) {
   currentPageData.nextPage = nextPage;
   currentPageData.pageName = pageName;
   currentPageData.pageFile = pageFile;
+  currentPageData.pageUrl = pageUrl;
   currentPageData.pageOut = pageOut;
 
   fs.mkdirSync(path.dirname(pageOut), { recursive: true });
@@ -325,6 +327,15 @@ function renderPage(page, prevPage, nextPage) {
         if (documentationPage["сторінки"]) {
           const submenuLinks = documentationPage["сторінки"]
             .map((documentationSubpage) => {
+              if (documentationSubpage["урл"]) {
+                const subUrl = documentationSubpage["урл"];
+                const isExternal = /^(https?:)?\/\//i.test(subUrl);
+                return renderNavigationItemSubmenuLinkTemplate({
+                  name: documentationSubpage["назва"],
+                  url: isExternal ? subUrl : `${urlPrefix}${subUrl}`,
+                  active: false,
+                });
+              }
               return renderNavigationItemSubmenuLinkTemplate({
                 name: documentationSubpage["назва"],
                 url: `${urlPrefix}${documentationSubpage["вихід"]}`,
@@ -340,6 +351,14 @@ function renderPage(page, prevPage, nextPage) {
               (documentationSubpage) =>
                 documentationSubpage["вихід"] === page["вихід"],
             ),
+          });
+        } else if (documentationPage["урл"]) {
+          const url = documentationPage["урл"];
+          const isExternal = /^(https?:)?\/\//i.test(url);
+          return renderNavigationItemLinkTemplate({
+            name: documentationPage["назва"],
+            url: isExternal ? url : `${urlPrefix}${url}`,
+            active: false,
           });
         } else {
           return renderNavigationItemLinkTemplate({
@@ -397,7 +416,7 @@ if (typeof global.extendAsync === "function") {
   await global.extendAsync();
 }
 
-(documentationFile["сторінки"] || [])
+const visiblePages = (documentationFile["сторінки"] || [])
   .flatMap((page) => {
     if (page["сторінки"]) {
       return page["сторінки"];
@@ -405,11 +424,13 @@ if (typeof global.extendAsync === "function") {
       return page;
     }
   })
-  .forEach((page, index, array) => {
-    renderPage(page, array[index - 1], array[index + 1]);
-  });
+  .filter((page) => !page["урл"]);
 
-(documentationFile["невидимі_сторінки"] || [])
+visiblePages.forEach((page, index, array) => {
+  renderPage(page, array[index - 1], array[index + 1]);
+});
+
+const invisiblePages = (documentationFile["невидимі_сторінки"] || [])
   .flatMap((page) => {
     if (page["невидимі_сторінки"]) {
       return page["невидимі_сторінки"];
@@ -417,9 +438,11 @@ if (typeof global.extendAsync === "function") {
       return page;
     }
   })
-  .forEach((page, index, array) => {
-    renderPage(page, array[index - 1], array[index + 1]);
-  });
+  .filter((page) => !page["урл"]);
+
+invisiblePages.forEach((page, index, array) => {
+  renderPage(page, array[index - 1], array[index + 1]);
+});
 
 function renderSearch() {
   const searchTemplate = searchTemplateText.replaceAll(
